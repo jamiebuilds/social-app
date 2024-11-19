@@ -2,6 +2,7 @@ import 'react-native-url-polyfill/auto'
 import '#/lib/sentry' // must be near top
 import '#/view/icons'
 
+import Purchases from 'react-native-purchases'
 import React, {useEffect, useState} from 'react'
 import {GestureHandlerRootView} from 'react-native-gesture-handler'
 import {KeyboardProvider} from 'react-native-keyboard-controller'
@@ -14,6 +15,8 @@ import * as SplashScreen from 'expo-splash-screen'
 import {msg} from '@lingui/macro'
 import {useLingui} from '@lingui/react'
 
+import {isIOS, isAndroid} from '#/platform/detection'
+import {RC_APPLE_PUBLIC_KEY, RC_GOOGLE_PUBLIC_KEY} from '#/env'
 import {QueryProvider} from '#/lib/react-query'
 import {
   initialize,
@@ -173,6 +176,14 @@ function App() {
     Promise.all([initPersistedState(), ensureGeolocationResolved()]).then(() =>
       setReady(true),
     )
+
+    Purchases.setLogLevel(Purchases.LOG_LEVEL.DEBUG)
+
+    if (isIOS) {
+      Purchases.configure({apiKey: RC_APPLE_PUBLIC_KEY})
+    } else if (isAndroid) {
+      Purchases.configure({apiKey: RC_GOOGLE_PUBLIC_KEY})
+    }
   }, [])
 
   if (!isReady) {
